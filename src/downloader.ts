@@ -75,10 +75,10 @@ export class Downloader {
     const outputPath = path.join(downloadDir, `${filename}.mp4`);
 
     // For m3u8 streams, prefer ffmpeg or yt-dlp with ffmpeg downloader to avoid issues
-    if (await this.commandExists('ffmpeg')) {
-      await this.runFFmpeg(url, outputPath, referer);
-    } else if (this.config.useYtDlp && await this.commandExists('yt-dlp')) {
+    if (this.config.useYtDlp && await this.commandExists('yt-dlp')) {
       await this.runYtDlpWithFFmpeg(url, outputPath, referer);
+    } else if (await this.commandExists('ffmpeg')) {
+      await this.runFFmpeg(url, outputPath, referer);
     } else {
       throw new Error('ffmpeg is required for m3u8 download to avoid playback issues');
     }
@@ -105,9 +105,11 @@ export class Downloader {
   private async runYtDlpWithFFmpeg(url: string, outputPath: string, referer?: string): Promise<void> {
     const args = [
       '--downloader', 'ffmpeg',
+      '--downloader-args', 'ffmpeg:-loglevel error -stats',
       '--no-skip-unavailable-fragments',
       '--fragment-retries', 'infinite',
       '-N', '16',
+      '--newline',
       '-o', outputPath
     ];
 
