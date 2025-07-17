@@ -1,14 +1,20 @@
+FROM denoland/deno:2.4.2 as builder
+
+WORKDIR /app
+
+COPY package-lock.json .
+COPY package.json .
+COPY deno.lock .
+RUN deno install
+COPY src/ ./src/
+RUN deno compile --allow-all --output ./lufy ./src/index.ts
+
 FROM fedora:37
 RUN dnf install 'dnf-command(copr)' -y
-# RUN dnf copr enable derisis13/ani-cli -y
 RUN dnf install git -y
 RUN dnf install fzf -y
 RUN dnf install mpv aria2 jq -y
-RUN git clone "https://github.com/pystardust/ani-cli.git"
-RUN cp ani-cli/ani-cli /usr/local/bin
-RUN chmod +x /usr/local/bin/ani-cli
-RUN rm -rf ani-cli
+COPY --from=builder /app/lufy /usr/local/bin/lufy
 WORKDIR /shared_media
 VOLUME [ "/shared_media" ]
-# https://github.com/pystardust/ani-cli?tab=readme-ov-file#dependencies-1
 CMD ["echo", "Ready to run"]
