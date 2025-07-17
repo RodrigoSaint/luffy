@@ -122,11 +122,10 @@ export class Downloader {
 
   private async runFFmpeg(url: string, outputPath: string, referer?: string): Promise<void> {
     const args = [
-      '-extension_picky', '0',
-      '-loglevel', 'error',
-      '-stats',
       '-i', url,
       '-c', 'copy',
+      '-loglevel', 'error',
+      '-stats',
       outputPath
     ];
 
