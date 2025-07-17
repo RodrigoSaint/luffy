@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { createWriteStream, promises as fs } from 'fs';
-import path from 'path';
+import { createWriteStream, promises as fs } from 'node:fs';
+import path from 'node:path';
 const Parser = require('m3u8-parser').Parser;
 
 export class HLSDownloader {
@@ -8,7 +8,7 @@ export class HLSDownloader {
 
   async downloadHLS(m3u8Url: string, outputPath: string, referer?: string): Promise<void> {
     console.log(`\x1b[1;36m→ Downloading HLS stream: ${m3u8Url}\x1b[0m`);
-    
+
     // Step 1: Parse the master playlist
     const masterPlaylist = await this.fetchPlaylist(m3u8Url, referer);
     const parser = new Parser();
@@ -21,7 +21,7 @@ export class HLSDownloader {
 
     // Step 2: Get the best quality stream URL
     const streams = parser.manifest.playlists;
-    const bestStream = streams.reduce((best: any, current: any) => 
+    const bestStream = streams.reduce((best: any, current: any) =>
       (current.attributes.BANDWIDTH > best.attributes.BANDWIDTH) ? current : best
     );
 
@@ -30,7 +30,7 @@ export class HLSDownloader {
     // Step 3: Get the segment playlist URL
     const segmentPlaylistUrl = this.resolveUrl(m3u8Url, bestStream.uri);
     const segmentPlaylist = await this.fetchPlaylist(segmentPlaylistUrl, referer);
-    
+
     // Step 4: Parse segment playlist
     const segmentParser = new Parser();
     segmentParser.push(segmentPlaylist);
@@ -46,19 +46,19 @@ export class HLSDownloader {
     // Step 5: Download all segments in parallel (in chunks to avoid overwhelming the server)
     const segmentBuffers: Buffer[] = new Array(segments.length);
     const chunkSize = 10; // Download 10 segments at a time
-    
+
     for (let i = 0; i < segments.length; i += chunkSize) {
       const chunk = segments.slice(i, i + chunkSize);
       const chunkPromises = chunk.map(async (segment: any, chunkIndex: number) => {
         const segmentIndex = i + chunkIndex;
         const segmentUrl = this.resolveUrl(segmentPlaylistUrl, segment.uri);
-        
+
         process.stdout.write(`\r\x1b[1;33m→ Downloading segments ${i + 1}-${Math.min(i + chunkSize, segments.length)}/${segments.length}...\x1b[0m`);
-        
+
         const segmentData = await this.downloadSegment(segmentUrl, referer);
         segmentBuffers[segmentIndex] = segmentData;
       });
-      
+
       await Promise.all(chunkPromises);
     }
 
@@ -66,7 +66,7 @@ export class HLSDownloader {
 
     // Step 6: Combine all segments into final file
     await this.combineSegments(segmentBuffers, outputPath);
-    
+
     console.log(`\x1b[1;32m✓ Successfully downloaded: ${path.basename(outputPath)}\x1b[0m`);
   }
 
@@ -96,19 +96,19 @@ export class HLSDownloader {
   private async combineSegments(segments: Buffer[], outputPath: string): Promise<void> {
     // Ensure output directory exists
     await fs.mkdir(path.dirname(outputPath), { recursive: true });
-    
+
     // Write all segments to the output file
     const writeStream = createWriteStream(outputPath);
-    
+
     return new Promise((resolve, reject) => {
       writeStream.on('error', reject);
       writeStream.on('finish', resolve);
-      
+
       // Write each segment buffer
       for (const segment of segments) {
         writeStream.write(segment);
       }
-      
+
       writeStream.end();
     });
   }
@@ -117,7 +117,7 @@ export class HLSDownloader {
     if (relativeUrl.startsWith('http')) {
       return relativeUrl;
     }
-    
+
     const base = new URL(baseUrl);
     return new URL(relativeUrl, base).toString();
   }

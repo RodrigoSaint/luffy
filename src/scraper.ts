@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { AnimeInfo } from './types';
+import { AnimeInfo } from './types.ts';
 
 export class AnimeScraper {
   private agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/121.0';
@@ -10,7 +10,7 @@ export class AnimeScraper {
   private decodeProviderId(encodedId: string): string {
     // Remove the -- prefix if present
     const cleanId = encodedId.startsWith('--') ? encodedId.slice(2) : encodedId;
-    
+
     // Split into hex pairs and decode using the mapping from original ani-cli
     const hexPairs = cleanId.match(/.{2}/g) || [];
     const decoded = hexPairs.map(hex => {
@@ -237,7 +237,7 @@ export class AnimeScraper {
                 const decodedUrl = this.decodeProviderId(source.sourceUrl);
                 const fullUrl = `https://${this.allanimeBase}${decodedUrl}`;
                 console.log(`\x1b[1;32m→ Decoded URL: ${fullUrl}\x1b[0m`);
-                
+
                 // Fetch the actual video links from the decoded URL
                 const videoLinksResponse = await axios.get(fullUrl, {
                   headers: {
@@ -245,7 +245,7 @@ export class AnimeScraper {
                     'Referer': this.allanimeRefr
                   }
                 });
-                
+
                 const videoData = videoLinksResponse.data;
                 if (videoData.links && videoData.links.length > 0) {
                   // Return the first available link

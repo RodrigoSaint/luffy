@@ -2,7 +2,7 @@ import { spawn } from 'node:child_process';
 import { promises as fs, createWriteStream } from 'node:fs';
 import path from 'node:path';
 import axios from 'axios';
-import { DownloadOptions, DownloadConfig } from './types';
+import { DownloadOptions, DownloadConfig } from './types.ts';
 
 export class Downloader {
   private config: DownloadConfig;
@@ -28,7 +28,7 @@ export class Downloader {
       }
       return;
     }
-    
+
     console.log(`\x1b[1;32m✓ Found direct source URL for ${filename}\x1b[0m`);
     console.log(`\x1b[1;36m  URL: ${url}\x1b[0m`);
 
@@ -228,13 +228,13 @@ export class Downloader {
       const contentLength = parseInt(response.headers['content-length'] || '0');
 
       // Check if it's a video file, m3u8 playlist, or large binary content
-      if (contentType.includes('video/') || 
-          contentType.includes('application/octet-stream') ||
-          contentType.includes('binary/octet-stream') ||
-          contentType.includes('application/vnd.apple.mpegurl') || // m3u8 files
-          contentType.includes('application/x-mpegurl') || // m3u8 files (alternative)
-          contentType.includes('text/plain') && url.includes('m3u8') || // some servers return text/plain for m3u8
-          (contentLength > 1000000)) { // > 1MB likely video
+      if (contentType.includes('video/') ||
+        contentType.includes('application/octet-stream') ||
+        contentType.includes('binary/octet-stream') ||
+        contentType.includes('application/vnd.apple.mpegurl') || // m3u8 files
+        contentType.includes('application/x-mpegurl') || // m3u8 files (alternative)
+        contentType.includes('text/plain') && url.includes('m3u8') || // some servers return text/plain for m3u8
+        (contentLength > 1000000)) { // > 1MB likely video
         console.log(`\x1b[1;32m  ✓ Valid video content detected (${contentType}, ${contentLength} bytes)\x1b[0m`);
         return true;
       }

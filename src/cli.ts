@@ -1,10 +1,10 @@
 import enquirer from 'enquirer';
-import { CLIOptions, DownloadConfig } from './types';
-import { AnimeScraper } from './scraper';
-import { Downloader } from './downloader';
-import { Imdb, LufyResult, mapToLufyResult } from './imdb';
-import path from 'path';
-import fs from 'fs';
+import { CLIOptions, DownloadConfig } from './types.ts';
+import { AnimeScraper } from './scraper.ts';
+import { Downloader } from './downloader.ts';
+import { Imdb, LufyResult, mapToLufyResult } from './imdb.ts';
+import path from 'node:path';
+import fs from 'node:fs';
 
 export class CLI {
   private scraper: AnimeScraper;
@@ -95,7 +95,7 @@ export class CLI {
   }
 
   async createDownloadDir(imdbResult: LufyResult, season: number) {
-    const downloadDir = path.join(`${imdbResult.title} [${imdbResult.year}]`, `Season ${season.toString().padStart(2, '0')}`)
+    const downloadDir = path.join(`${imdbResult.title} (${imdbResult.year})`, `Season ${season.toString().padStart(2, '0')}`)
     fs.mkdirSync(downloadDir, { recursive: true })
     return downloadDir
   }

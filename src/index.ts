@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 import { program } from 'commander';
-import { CLI } from './cli';
-import { CLIOptions } from './types';
-import * as packageJson from '../package.json';
+import { CLI } from './cli.ts';
+import { CLIOptions } from './types.ts';
+import packageJson from '../package.json' with { type: 'json' };
 
 program
   .name('ani-cli-ts')
