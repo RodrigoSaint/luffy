@@ -11,7 +11,8 @@ RUN deno compile --allow-all --output ./lufy ./src/index.ts
 
 FROM fedora:37
 RUN dnf install 'dnf-command(copr)' -y
-RUN dnf install git -y
+RUN dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
+RUN dnf install git ffmpeg -y
 RUN dnf install fzf -y
 RUN dnf install mpv aria2 jq -y
 COPY --from=builder /app/lufy /usr/local/bin/lufy
